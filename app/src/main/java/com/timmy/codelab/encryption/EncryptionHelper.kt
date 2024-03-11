@@ -1,11 +1,10 @@
 package com.timmy.codelab.encryption
 
 import android.content.Context
-import android.os.Build
-import android.security.KeyPairGeneratorSpec
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.edit
 import java.math.BigInteger
 import java.security.KeyPairGenerator
@@ -44,6 +43,7 @@ class EncryptionHelper(context: Context) {
             keyStore = KeyStore.getInstance(KEYSTORE_PROVIDER).apply {
                 load(null)
             }
+            Log.i("TAG", "TimmmmmmY => ${keyStore?.containsAlias(KEYSTORE_ALIAS) == false}")
             if (keyStore?.containsAlias(KEYSTORE_ALIAS) == false) {
                 generateRsaKey()
                 generateAesKey()
@@ -58,41 +58,22 @@ class EncryptionHelper(context: Context) {
     private fun generateRsaKey() {
         val certificateSubject = X500Principal("CN=Android, O=Timmy, C=TW, L=Taipei")
         val certificateSerialNumber = BigInteger.TEN
-        @Suppress("DEPRECATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            KeyPairGenerator
-                .getInstance(KeyProperties.KEY_ALGORITHM_RSA, KEYSTORE_PROVIDER).apply {
-                    initialize(
-                        KeyGenParameterSpec
-                            .Builder(
-                                KEYSTORE_ALIAS,
-                                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                            )
-                            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                            .setCertificateSubject(certificateSubject)
-                            .setCertificateSerialNumber(certificateSerialNumber)
-                            .build()
-                    )
-                    generateKeyPair()
-                }
-        } else {
-            val start = Calendar.getInstance()
-            val end = Calendar.getInstance()
-            end.add(Calendar.YEAR, 100)
-
-            val spec = KeyPairGeneratorSpec.Builder(appContext)
-                .setAlias(KEYSTORE_ALIAS)
-                .setSubject(certificateSubject)
-                .setSerialNumber(certificateSerialNumber)
-                .setStartDate(start.time)
-                .setEndDate(end.time)
-                .build()
-            KeyPairGenerator.getInstance("RSA", KEYSTORE_PROVIDER).apply {
-                initialize(spec)
+        KeyPairGenerator
+            .getInstance(KeyProperties.KEY_ALGORITHM_RSA, KEYSTORE_PROVIDER).apply {
+                initialize(
+                    KeyGenParameterSpec
+                        .Builder(
+                            KEYSTORE_ALIAS,
+                            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                        )
+                        .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
+                        .setCertificateSubject(certificateSubject)
+                        .setCertificateSerialNumber(certificateSerialNumber)
+                        .build()
+                )
                 generateKeyPair()
             }
-        }
     }
 
     @Throws(Exception::class)
